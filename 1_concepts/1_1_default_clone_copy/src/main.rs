@@ -8,18 +8,16 @@ struct Point {
 
 #[derive(Clone)]
 struct Polyline {
-    points: Option<Vec<Point>>,
+    points: Vec<Point>,
 }
 
 impl Polyline {
     pub fn new() -> Self {
-        Polyline { points: None }
+        Polyline { points: vec![] }
     }
 
     pub fn from_vec(points: Vec<Point>) -> Self {
-        Polyline {
-            points: Some(points),
-        }
+        Polyline { points }
     }
 }
 
@@ -33,12 +31,9 @@ impl fmt::Display for Polyline {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut s: Vec<String> = vec!["Polyline (".to_owned()];
 
-        if let Some(pts) = &self.points {
-            for point in pts {
-                s.push(format!("[{};{}]", point.x, point.y));
-            }
+        for point in &self.points {
+            s.push(format!("[{};{}]", point.x, point.y));
         }
-
         s.push(")".to_owned());
 
         write!(f, "{}", s.join(" "))
