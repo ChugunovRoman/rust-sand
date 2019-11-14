@@ -1,45 +1,35 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+#[derive(Clone)]
 struct GlobalStack<T> {
-    data: Vec<Rc<RefCell<T>>>,
+    data: Rc<RefCell<Vec<T>>>,
 }
 
 impl<T> GlobalStack<T> {
     pub fn new() -> Self {
-        GlobalStack { data: vec![] }
+        GlobalStack {
+            data: Rc::new(RefCell::new(vec![])),
+        }
     }
 
-    pub fn push(self: &mut Self, value: T) {
-        self.data.push(Rc::new(RefCell::new(value)));
-    }
-    pub fn pop(self: &mut Self) -> Option<Rc<RefCell<T>>> {
-        if self.data.len() > 0 {
-            return Some(self.data.get(self.data.len() - 1).unwrap().clone());
-        } else {
-            return None;
-        }
+    pub fn push(self: &Self, value: T) {
+        let mut vec = self.data.borrow_mut();
+        vec.push(value);
     }
 }
 
 fn main() {
-    let mut stack: GlobalStack<i32> = GlobalStack::new();
+    let stack: GlobalStack<i32> = GlobalStack::new();
 
     stack.push(11);
     stack.push(1);
     stack.push(41);
 
-    println!("{:?}", stack.data);
-
-    let value: Rc<RefCell<i32>> = stack.pop().unwrap();
-    *value.try_borrow_mut().unwrap() -= 10;
-
-    println!("{:?}", stack.data);
+    let stack2 = stack.clone();
 
     stack.push(666);
 
-    let value2: Rc<RefCell<i32>> = stack.pop().unwrap();
-    *value2.try_borrow_mut().unwrap() -= 10;
-
     println!("{:?}", stack.data);
+    println!("{:?}", stack2.data);
 }
