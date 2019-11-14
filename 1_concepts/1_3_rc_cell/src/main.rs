@@ -1,6 +1,4 @@
-use std::borrow::BorrowMut;
 use std::cell::RefCell;
-use std::cell::RefMut;
 use std::rc::Rc;
 
 struct GlobalStack<T> {
@@ -12,45 +10,36 @@ impl<T> GlobalStack<T> {
         GlobalStack { data: vec![] }
     }
 
-    pub fn push(self: &mut Self, value: Rc<RefCell<T>>) {
-        self.data.push(value);
+    pub fn push(self: &mut Self, value: T) {
+        self.data.push(Rc::new(RefCell::new(value)));
     }
-    // pub fn pop(self: &mut Self) -> Option<RefCell<T>> {
-    //     if self.data.len() > 0 {
-    //         return Some(self.data.pop().unwrap());
-    //     } else {
-    //         return None;
-    //     }
-    // }
-    pub fn get(self: &mut Self, index: i32) -> RefCell<T> {
-        // self.data.get(index as usize).unwrap()
+    pub fn pop(self: &mut Self) -> Option<Rc<RefCell<T>>> {
+        if self.data.len() > 0 {
+            return Some(self.data.get(self.data.len() - 1).unwrap().clone());
+        } else {
+            return None;
+        }
     }
-}
-
-fn a_fn_that_mutably_borrows(b: &mut i32) {
-    *b += 1;
 }
 
 fn main() {
     let mut stack: GlobalStack<i32> = GlobalStack::new();
-    let value = Rc::new(RefCell::new(11));
 
-    stack.push(2);
-    stack.push(9);
-    stack.push(0);
+    stack.push(11);
     stack.push(1);
+    stack.push(41);
 
     println!("{:?}", stack.data);
 
-    // let value: RefCell<i32> = stack.get(3);
+    let value: Rc<RefCell<i32>> = stack.pop().unwrap();
+    *value.try_borrow_mut().unwrap() -= 10;
 
     println!("{:?}", stack.data);
 
-    // let stack = vec![RefCell::new(11)];
+    stack.push(666);
 
-    // let v = stack.get(0).unwrap();
+    let value2: Rc<RefCell<i32>> = stack.pop().unwrap();
+    *value2.try_borrow_mut().unwrap() -= 10;
 
-    // a_fn_that_mutably_borrows(&mut v.borrow_mut());
-
-    // println!("{:?}", stack);
+    println!("{:?}", stack.data);
 }
