@@ -3,32 +3,30 @@ use std::pin::Pin;
 use std::rc::Rc;
 
 trait MutMeSomehow {
-    fn mut_me_somehow(self: Pin<&mut Self>);
+    fn mut_me_somehow(self: &mut Self);
 }
 
 trait SayHi {
-    fn say_hi(self: Pin<&Self>) {
+    fn say_hi(self: &Self) {
         println!("Hi from");
     }
 }
 
-impl<i32> SayHi for Box<i32>
+impl<T> SayHi for Box<T>
 where
-    i32: Debug,
+    T: Debug,
 {
-    fn say_hi(self: Pin<&Self>) {
+    fn say_hi(self: &Self) {
         println!("Hi from Box: {:?}", self)
     }
 }
 
-impl<i32> MutMeSomehow for Box<&mut i32> {
-    fn mut_me_somehow(self: Pin<&mut Self>) {
-        let s = **self;
-        *s = 0;
-//        let p = unsafe { self.get_unchecked_mut() }.as_mut();
-//        *p = 0;
-    }
-}
+// impl<i32> MutMeSomehow for Box<i32> {
+//     fn mut_me_somehow(self: &mut Self) {
+//         let mut value = self.as_mut();
+//         value = value + 2;
+//     }
+// }
 
 // impl<T> SayHi for Rc<T> {
 //     fn say_hi(self: Pin<&Self>) {
@@ -64,38 +62,39 @@ impl<i32> MutMeSomehow for Box<&mut i32> {
 //     }
 // }
 
-// impl SayHi for &[u8] {
-//     fn say_hi(self: Pin<&Self>) {
-//         println!("Hi from {:?}", self);
-//     }
-// }
+impl SayHi for &[u8] {
+    fn say_hi(self: &Self) {
+        println!("Hi from {:?}", self);
+    }
+}
 
 // impl MutMeSomehow for &[u8] {
-//     fn mut_me_somehow(self: Pin<&mut Self>) {
-//         self.reverse();
+//     fn mut_me_somehow(self: &mut Self) {
+//         *self.reverse();
 //     }
 // }
 
 impl SayHi for i32 {
-    fn say_hi(self: Pin<&Self>) {
+    fn say_hi(self: &Self) {
         println!("Hi from {:?}", self);
     }
 }
 
 impl MutMeSomehow for i32 {
-    fn mut_me_somehow(self: Pin<&mut Self>) {
-        *self = 5;
+    fn mut_me_somehow(self: &mut Self) {
+        *self = *self << 1;
     }
 }
 
 fn main() {
-    //    let b = Box::pin(5);
-    //    let b2 = Pin::new(5);
-    //    b.say_hi();
+    let b = Box::new(1);
+    b.say_hi();
 
     // let s = "".to_owned();
     // println!("Box: {}", b);
 
-    let num: i32 = 5;
+    let mut num: i32 = 5;
     num.say_hi();
+    num.mut_me_somehow();
+    println!("num: {}", num);
 }
